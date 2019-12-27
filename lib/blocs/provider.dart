@@ -7,8 +7,17 @@
 import 'package:flutter/material.dart';
 import 'package:crud_curso_flutter/blocs/login_bloc.dart';
 export 'package:crud_curso_flutter/blocs/login_bloc.dart';
+import 'package:crud_curso_flutter/blocs/productos_bloc.dart';
+export 'package:crud_curso_flutter/blocs/productos_bloc.dart';
 
 class Provider extends InheritedWidget{
+  
+  //Instancio LoginBloc
+  final loginBloc= new LoginBloc();//new es opcional
+
+  //Instancio ProductoBloc
+  final _productoBloc= new ProductosBloc();
+
   //PATRON SINGLETON PARA CONSERVAR DATOS A PESAR DE HOTRELOAD
   static Provider _instancia;
 
@@ -23,12 +32,6 @@ class Provider extends InheritedWidget{
  //Constructor2
   Provider._internal({Key key, Widget child}):super(key:key, child:child);
 
-
-
-  //Instancio LoginBloc
-  final loginBloc= LoginBloc();
-
-  
   //Metodo donde digo que todos los cambios en al algun widget sea notificado a todos los widgets
   @override
   bool updateShouldNotify(InheritedWidget oldWidget) => true;
@@ -37,6 +40,13 @@ class Provider extends InheritedWidget{
   static LoginBloc of (BuildContext context){
     return ( context.inheritFromWidgetOfExactType(Provider) as Provider).loginBloc;
   }
+
+  //Metodo para instanciar y recuperar ProductosBloc
+  static ProductosBloc productosBloc (BuildContext context){
+    return ( context.inheritFromWidgetOfExactType(Provider) as Provider)._productoBloc;
+  }
+
+
 
   
 

@@ -57,6 +57,9 @@ class ProductoProvider{
 
     if(decodedData == null) return [];//si no hay datos retorno lista vacia
 
+    //Si retorna un error y el token expiro retorna una lista vacia
+    if ( decodedData['error'] !=null ) return [];
+
     //Firebase recibe id y producto , debido a que la estructura del json es la siguiente
     /**
      * -LtmKmb8oGYDQS4cvvUD: {disponible: true, titulo: Tamal, valor: 12.5}

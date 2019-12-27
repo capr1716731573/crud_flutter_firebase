@@ -1,24 +1,46 @@
 
+import 'package:crud_curso_flutter/blocs/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:crud_curso_flutter/models/producto_model.dart';
-import 'package:crud_curso_flutter/providers/producto_provider.dart';
+//import 'package:crud_curso_flutter/providers/producto_provider.dart';
 
 class HomePage extends StatelessWidget {
-  final _productoProvider=new ProductoProvider();
+ 
   @override
   Widget build(BuildContext context) {
-    //final bloc=Provider.of(context);
+
+    final productosBloc= new ProductosBloc();
+    productosBloc.cargarProductos();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Home Page'),
       ),
-      body: _crearListado(),
+      body: _crearListado(productosBloc),
       floatingActionButton: _crearFABBoton(context),
     );
   }
   
-  Widget _crearListado() {
-    return FutureBuilder(
+  Widget _crearListado( ProductosBloc productosBloc) {
+    return StreamBuilder(
+      stream: productosBloc.productosStream ,
+      builder: (BuildContext context, AsyncSnapshot<List<ProductoModel>> snapshot){
+        //preguntar si hay informacion
+        if(snapshot.hasData){
+          final productos=snapshot.data;
+
+          return ListView.builder(
+            itemCount: productos.length,
+            itemBuilder: (BuildContext context, int index) => _crearItem(context,productos[index],productosBloc)
+          );
+        }else{
+          return Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+
+
+    /* return FutureBuilder(
       future: _productoProvider.cargarProductos(),
       builder: (BuildContext context, AsyncSnapshot<List<ProductoModel>> snapshot) {
         //preguntar si hay informacion
@@ -33,18 +55,19 @@ class HomePage extends StatelessWidget {
           return Center(child: CircularProgressIndicator());
         }
       },
-    );
+    ); */
   }
   
   //Crear Item del Listado
-  Widget _crearItem(BuildContext context, ProductoModel producto) {
+  Widget _crearItem(BuildContext context, ProductoModel producto, ProductosBloc productosBloc) {
     return Dismissible(
           key: UniqueKey(),
           background: Container(
             color: Colors.red,
           ),
           onDismissed: (direccion){
-            _productoProvider.borrarProducto(producto.id);
+            productosBloc.borrarProducto(producto.id);
+            //_productoProvider.borrarProducto(producto.id);
           },
           child: Card(
             child: Column(

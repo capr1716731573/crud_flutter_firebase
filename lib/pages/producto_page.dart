@@ -1,4 +1,5 @@
 
+import 'package:crud_curso_flutter/blocs/provider.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
@@ -6,7 +7,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 
-import 'package:crud_curso_flutter/providers/producto_provider.dart';
+//simport 'package:crud_curso_flutter/providers/producto_provider.dart';
 import 'package:crud_curso_flutter/blocs/utils.dart' as claseUtils;
 import 'package:crud_curso_flutter/models/producto_model.dart';
 
@@ -31,7 +32,10 @@ class _ProductoPageState extends State<ProductoPage> {
   bool _estaGuardando=false;
 
   //Instancia del provider para hacer peticiones CRUD
-  final ProductoProvider _productoProvider= new ProductoProvider();
+  //final ProductoProvider _productoProvider= new ProductoProvider();
+
+  //Implementacion con streams
+  ProductosBloc productosBloc;
 
   //Variable de tipo File para almacenar la foto tanto de  la camara como de la galeria
   File foto;
@@ -39,6 +43,9 @@ class _ProductoPageState extends State<ProductoPage> {
 
   @override
   Widget build(BuildContext context) {
+    //inicializar bloc y con esto tengo acceso a ella en todos los lugares de mi app
+    productosBloc= Provider.productosBloc(context);
+
     //Capturo los argumentos que vienen desde otra pagina
     final ProductoModel productoData= ModalRoute.of(context).settings.arguments;
 
@@ -169,31 +176,28 @@ class _ProductoPageState extends State<ProductoPage> {
 
     //Aqui guardo la foto y actualizo el url del registro
     if( foto != null){
-      productoModel.fotoUrl= await _productoProvider.subirImagen(foto);
+      productoModel.fotoUrl= await productosBloc.subirFoto(foto);
     }
 
     if(productoModel.id != null){
       //Actualiza el registro
-      _productoProvider.editarProducto(productoModel);
+      productosBloc.editarProducto(productoModel);
       mensaje='Registro Actualizado!!';
-       //Muestro el SnackBar
-        mostrarSnackBar(mensaje);
-
+       
         //Navigator.pop(context);
     }else{
       //Crea el registro
       //crear producto en BDD de Firebase por medio del Provider
       //Retorno el id del producto, para que la proxima que aplaste el boton sea para editar
-      _productoProvider.crearProducto(productoModel).then((valorReturnFuture){
-        productoModel.id=valorReturnFuture;
-        print('El producto id es : ${productoModel.id}');
-      });
+      productosBloc.crearProducto(productoModel);
       
       mensaje='Registro Creado!!';
 
-       //Muestro el SnackBar
-        mostrarSnackBar(mensaje);
     }
+
+    //Muestro el SnackBar
+    mostrarSnackBar(mensaje);
+    Navigator.pop(context);
 
     //Desbloquea el boton despues de guardar
     setState(() { _estaGuardando=false; });
